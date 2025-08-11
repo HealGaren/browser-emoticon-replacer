@@ -45,7 +45,7 @@ jobs:
           tag_name: ${{ steps.get_version.outputs.version }}
           name: Release ${{ steps.get_version.outputs.version }}
           files: |
-            dist/main.exe
-            dist/main.min.js
+            dist/browserEmoticonReplacer.exe
+            dist/browserEmoticonReplacer.min.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

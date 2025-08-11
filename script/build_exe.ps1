@@ -5,7 +5,7 @@ if (-not (Test-Path $distDir)) {
 
 Invoke-PS2EXE `
    -InputFile  "$PSScriptRoot\..\main.ps1" `
-   -OutputFile "$distDir\main.exe" `
+   -OutputFile "$distDir\browserEmoticonReplacer.exe" `
    -NoConsole:$false `
    -RequireAdmin:$false `
-   -Verbose
+#    -Verbose

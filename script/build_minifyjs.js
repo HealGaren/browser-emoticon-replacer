@@ -3,7 +3,7 @@ const path = require('path');
 const terser = require('terser');
 
 const src = path.join(__dirname, '..', 'main.js');
-const dst = path.join(__dirname, '..', 'dist', 'main.min.js');
+const dst = path.join(__dirname, '..', 'dist', 'browserEmoticonReplacer.min.js');
 
 if (!fs.existsSync(src)) {
     console.error(`main.js not found: ${src}`);
@@ -24,4 +24,3 @@ terser.minify(code, { compress: true, mangle: true }).then(result => {
     console.error('Minify failed:', err);
     process.exit(1);
 });
-
