@@ -7,7 +7,6 @@
     "start:node": "node main",
     "start:ps1": "powershell ./main.ps1",
     "install:ps1": "powershell ./script/install_ps2exe.ps1",
-    "install:node": "pnpm install",
     "build:ps1": "powershell ./script/build_exe.ps1",
     "build:minjs": "node ./script/build_minifyjs.js"
   },

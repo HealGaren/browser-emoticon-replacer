@@ -1,0 +1,49 @@
+name: Release Build
+
+on:
+  push:
+    branches:
+      - 'release/*'
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install PowerShell modules for ps2exe
+        run: pwsh ./script/install_ps2exe.ps1
+
+      - name: Build EXE
+        run: pwsh ./script/build_exe.ps1
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build minified JS
+        run: npm run build:minjs
+
+      - name: Get version from branch name
+        id: get_version
+        run: |
+          $branch = "${{ github.ref }}".Split('/')[-1]
+          echo "version=$branch" >> $env:GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          name: Release ${{ steps.get_version.outputs.version }}
+          files: |
+            dist/main.exe
+            dist/main.min.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
