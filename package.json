@@ -1,0 +1,20 @@
+{
+  "name": "browser-emoticon-replacer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start:node": "node main",
+    "start:ps1": "powershell ./main.ps1",
+    "start:exe": "main.exe",
+    "build:ps1": "powershell ./build_exe.ps1"
+  },
+  "keywords": [],
+  "author": "healgaren",
+  "license": "ISC",
+  "packageManager": "pnpm@10.14.0",
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "ws": "^8.18.3"
+  }
+}
