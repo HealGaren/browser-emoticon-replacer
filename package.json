@@ -19,6 +19,7 @@
     "ws": "^8.18.3"
   },
   "devDependencies": {
+    "adm-zip": "^0.5.16",
     "terser": "^5.43.1"
   }
 }

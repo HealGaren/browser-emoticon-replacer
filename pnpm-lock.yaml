@@ -15,6 +15,9 @@ importers:
         specifier: ^8.18.3
         version: 8.18.3
     devDependencies:
+      adm-zip:
+        specifier: ^0.5.16
+        version: 0.5.16
       terser:
         specifier: ^5.43.1
         version: 5.43.1
@@ -41,6 +44,10 @@ packages:
     resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
+
+  adm-zip@0.5.16:
+    resolution: {integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==}
+    engines: {node: '>=12.0'}
 
   buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
@@ -119,6 +126,8 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.4
 
   acorn@8.15.0: {}
+
+  adm-zip@0.5.16: {}
 
   buffer-from@1.1.2: {}
 
