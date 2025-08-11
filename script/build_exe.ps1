@@ -1,5 +1,11 @@
+$distDir = Join-Path $PSScriptRoot '..\dist'
+if (-not (Test-Path $distDir)) {
+    New-Item -Path $distDir -ItemType Directory -Force | Out-Null
+}
+
 Invoke-PS2EXE `
-   -inputFile "./main.ps1" `
-   -outputFile "./dist/main.exe" `
-   -noConsole:$false `
-   -requireAdmin:$false
+   -InputFile  "$PSScriptRoot\..\main.ps1" `
+   -OutputFile "$distDir\main.exe" `
+   -NoConsole:$false `
+   -RequireAdmin:$false `
+   -Verbose

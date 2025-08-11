@@ -5,6 +5,9 @@ on:
     branches:
       - 'release/*'
 
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
     runs-on: windows-latest
@@ -46,4 +49,3 @@ jobs:
             dist/main.min.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
