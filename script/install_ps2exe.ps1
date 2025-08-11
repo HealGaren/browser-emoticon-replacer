@@ -1,0 +1,1 @@
+Install-Module -Name ps2exe -force -Scope CurrentUser
