@@ -1,11 +1,4 @@
 // CSS 변수에서 값 읽기
-const style = getComputedStyle(document.documentElement);
-const BaseURL = style.getPropertyValue('--base-url').replace(/['"]/g, '').trim();
-const DebugPort = style.getPropertyValue('--debug-port').replace(/['"]/g, '').trim();
-const TargetPrefix = style.getPropertyValue('--target-prefix').replace(/['"]/g, '').trim();
-const TimeoutSec = 5;
-
-// 로그 출력 함수
 function logMessage(msg) {
     const logDiv = document.getElementById('log');
     if (logDiv) {
@@ -15,7 +8,7 @@ function logMessage(msg) {
     }
 }
 
-async function fetchDebuggerList() {
+async function fetchDebuggerList(DebugPort) {
     logMessage(`디버거 리스트를 가져오는 중...`);
     try {
         const response = await fetch(`http://localhost:${DebugPort}/json/list`);
@@ -28,7 +21,7 @@ async function fetchDebuggerList() {
     }
 }
 
-function findWebSocketUrls(debuggerList) {
+function findWebSocketUrls(debuggerList, TargetPrefix) {
     logMessage(`WebSocket 대상 필터링...`);
     const urls = debuggerList
         .filter(item => item && item.url && item.url.startsWith(TargetPrefix))
@@ -53,7 +46,7 @@ function connectWebSocket(url) {
     });
 }
 
-function sendEvaluateCommand(ws, expression) {
+function sendEvaluateCommand(ws, expression, TimeoutSec) {
     logMessage(`스크립트 실행 명령 전송...`);
     const command = {
         id: 1,
@@ -78,10 +71,17 @@ function sendEvaluateCommand(ws, expression) {
 }
 
 async function main() {
+    // CSS 변수에서 값 읽기 (매번 최신값으로 갱신)
+    const style = getComputedStyle(document.documentElement);
+    const BaseURL = style.getPropertyValue('--base-url').replace(/['"]/g, '').trim();
+    const DebugPort = style.getPropertyValue('--debug-port').replace(/['"]/g, '').trim();
+    const TargetPrefix = style.getPropertyValue('--target-prefix').replace(/['"]/g, '').trim();
+    const TimeoutSec = 5;
+
     logMessage('실행 시작');
     try {
-        const debuggerList = await fetchDebuggerList();
-        const webSocketUrls = findWebSocketUrls(debuggerList);
+        const debuggerList = await fetchDebuggerList(DebugPort);
+        const webSocketUrls = findWebSocketUrls(debuggerList, TargetPrefix);
         if (!webSocketUrls.length) {
             logMessage('WebSocket URL을 찾을 수 없습니다.');
             throw new Error('WebSocket URL not found');
@@ -174,7 +174,7 @@ if (!window['__custom_dccon']) {
 }
 `;
             try {
-                const response = await sendEvaluateCommand(ws, expression);
+                const response = await sendEvaluateCommand(ws, expression, TimeoutSec);
                 logMessage(`스크립트 실행 결과: ${JSON.stringify(response.result)}`);
             } catch (err) {
                 logMessage(`스크립트 실행 실패: ${err.message}`);
@@ -189,5 +189,28 @@ if (!window['__custom_dccon']) {
     logMessage('실행 종료');
 }
 
-// 페이지 로드 시 자동 실행
-window.addEventListener('DOMContentLoaded', main);
+function isObsCssReady() {
+    const style = getComputedStyle(document.documentElement);
+    return style.getPropertyValue('--obs-css-ready').replace(/['"]/g, '').trim() === '1';
+}
+
+let tryCount = 0;
+const maxTry = 5;
+
+function tryRunMain() {
+    tryCount++;
+    if (isObsCssReady()) {
+        logMessage('OBS CSS가 로드됨을 감지했습니다. 스크립트 실행!');
+        main();
+    } else if (tryCount < maxTry) {
+        logMessage(`OBS CSS가 아직 준비되지 않았습니다. ${3 * tryCount}초 후 재시도 (${tryCount}/${maxTry})`);
+        setTimeout(tryRunMain, 3000);
+    } else {
+        logMessage('OBS CSS가 준비되지 않아 스크립트 실행을 중단합니다.');
+    }
+}
+
+// 페이지 로드 시 0.1초 후 첫 시도
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(tryRunMain, 100);
+});
