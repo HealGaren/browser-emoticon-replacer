@@ -45,3 +45,11 @@ jobs:
             dist/browserEmoticonReplacer_win.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deploy frontend to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: frontend
+          publish_branch: gh-pages
+          force_orphan: true
