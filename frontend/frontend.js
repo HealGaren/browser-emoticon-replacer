@@ -5,39 +5,71 @@ const DebugPort = style.getPropertyValue('--debug-port').replace(/['"]/g, '').tr
 const TargetPrefix = style.getPropertyValue('--target-prefix').replace(/['"]/g, '').trim();
 const TimeoutSec = 5;
 
+// 로그 출력 함수
+function logMessage(msg) {
+    const logDiv = document.getElementById('log');
+    if (logDiv) {
+        const now = new Date().toLocaleTimeString();
+        logDiv.textContent += `[${now}] ${msg}\n`;
+        logDiv.scrollTop = logDiv.scrollHeight;
+    }
+}
+
 async function fetchDebuggerList() {
-    const response = await fetch(`http://localhost:${DebugPort}/json/list`);
-    if (!response.ok) throw new Error('Failed to fetch debugger list');
-    return response.json();
+    logMessage(`디버거 리스트를 가져오는 중...`);
+    try {
+        const response = await fetch(`http://localhost:${DebugPort}/json/list`);
+        if (!response.ok) throw new Error('Failed to fetch debugger list');
+        logMessage(`디버거 리스트 가져오기 성공`);
+        return response.json();
+    } catch (err) {
+        logMessage(`디버거 리스트 가져오기 실패: ${err.message}`);
+        throw err;
+    }
 }
 
 function findWebSocketUrls(debuggerList) {
-    return debuggerList
+    logMessage(`WebSocket 대상 필터링...`);
+    const urls = debuggerList
         .filter(item => item && item.url && item.url.startsWith(TargetPrefix))
         .map(item => item.webSocketDebuggerUrl)
         .filter(Boolean);
+    logMessage(`WebSocket 대상 ${urls.length}개 발견`);
+    return urls;
 }
 
 function connectWebSocket(url) {
+    logMessage(`WebSocket 연결 시도: ${url}`);
     return new Promise((resolve, reject) => {
         const ws = new WebSocket(url);
-        ws.onopen = () => resolve(ws);
-        ws.onerror = (error) => reject(error);
+        ws.onopen = () => {
+            logMessage(`WebSocket 연결 성공`);
+            resolve(ws);
+        };
+        ws.onerror = (error) => {
+            logMessage(`WebSocket 연결 실패`);
+            reject(error);
+        };
     });
 }
 
 function sendEvaluateCommand(ws, expression) {
+    logMessage(`스크립트 실행 명령 전송...`);
     const command = {
         id: 1,
         method: "Runtime.evaluate",
         params: { expression }
     };
     return new Promise((resolve, reject) => {
-        const timeout = setTimeout(() => reject(new Error('Evaluate command timeout')), TimeoutSec * 1000);
+        const timeout = setTimeout(() => {
+            logMessage('스크립트 실행 응답 대기 시간 초과');
+            reject(new Error('Evaluate command timeout'));
+        }, TimeoutSec * 1000);
         ws.onmessage = (event) => {
             const response = JSON.parse(event.data);
             if (response.id === command.id) {
                 clearTimeout(timeout);
+                logMessage('스크립트 실행 응답 수신');
                 resolve(response);
             }
         };
@@ -46,14 +78,23 @@ function sendEvaluateCommand(ws, expression) {
 }
 
 async function main() {
+    logMessage('실행 시작');
     try {
         const debuggerList = await fetchDebuggerList();
         const webSocketUrls = findWebSocketUrls(debuggerList);
-        if (!webSocketUrls.length) throw new Error('WebSocket URL not found');
+        if (!webSocketUrls.length) {
+            logMessage('WebSocket URL을 찾을 수 없습니다.');
+            throw new Error('WebSocket URL not found');
+        }
 
         for (const webSocketUrl of webSocketUrls) {
-            const ws = await connectWebSocket(webSocketUrl);
-            console.log('WebSocket connected:', webSocketUrl);
+            let ws;
+            try {
+                ws = await connectWebSocket(webSocketUrl);
+            } catch (err) {
+                logMessage(`WebSocket 연결 실패: ${err.message}`);
+                continue;
+            }
 
             const expression = `
 if (!window['__custom_dccon']) {
@@ -132,14 +173,20 @@ if (!window['__custom_dccon']) {
     'already executed';
 }
 `;
-            const response = await sendEvaluateCommand(ws, expression);
-            console.log('Evaluate response:', response);
-
+            try {
+                const response = await sendEvaluateCommand(ws, expression);
+                logMessage(`스크립트 실행 결과: ${JSON.stringify(response.result)}`);
+            } catch (err) {
+                logMessage(`스크립트 실행 실패: ${err.message}`);
+            }
             ws.close();
+            logMessage('WebSocket 연결 종료');
         }
     } catch (error) {
+        logMessage(`오류 발생: ${error.message}`);
         console.error('Error:', error);
     }
+    logMessage('실행 종료');
 }
 
 // 페이지 로드 시 자동 실행

@@ -26,6 +26,20 @@
       border-radius: 12px;
       box-shadow: 0 2px 16px rgba(0,0,0,0.3);
       text-align: center;
+      min-width: 350px;
+    }
+    #log {
+      background: #222;
+      color: #b5e0ff;
+      font-size: 0.95em;
+      margin-top: 1.5em;
+      padding: 1em;
+      border-radius: 8px;
+      height: 180px;
+      overflow-y: auto;
+      text-align: left;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.2);
+      white-space: pre-line;
     }
     button {
       margin-top: 2em;
@@ -45,7 +59,8 @@
 </head>
 <body>
   <div class="container">
-    <h2>이 화면이 방송에 나오지 않도록<br>[소스 목록]의 눈 아이콘을 눌러 가려주세요</h2>
+    <h2>이 화면이 방송에 나오지 않도록 OBS의 캔버스 바깥으로 치워주세요.<br></h2>
+    <div id="log"></div>
     <button id="refreshBtn">새로고침</button>
   </div>
   <script src="./frontend.js"></script>
@@ -56,4 +71,3 @@
   </script>
 </body>
 </html>
-
